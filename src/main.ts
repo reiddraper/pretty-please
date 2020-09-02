@@ -8,7 +8,6 @@ import {OctokitResponse, PullsGetResponseData} from '@octokit/types'
 import * as prettier from 'prettier'
 
 import * as process from 'process'
-import * as util from 'util'
 import {promises as fs} from 'fs'
 
 async function run(): Promise<void> {
@@ -55,11 +54,7 @@ async function run(): Promise<void> {
             }
           }
 
-          const checkoutExitCode = await exec.exec(
-            'git',
-            ['checkout', pr.data.head.ref],
-            {ignoreReturnCode: true}
-          )
+          await exec.exec('git', ['checkout', pr.data.head.ref])
 
           for (const filename of filesToFormat) {
             const fileContents = (await fs.readFile(filename)).toString()
@@ -69,31 +64,36 @@ async function run(): Promise<void> {
             await fs.writeFile(filename, formatted)
           }
 
-          await exec.exec('git', ['config', 'user.name', 'prettier-please'])
+          await exec.exec('git', ['config', 'user.name', 'github-actions'])
           await exec.exec('git', [
             'config',
             'user.email',
             'github-actions@github.com'
           ])
           await exec.exec('git', ['add'].concat(filesToFormat))
-          await exec.exec('git', [
-            'commit',
-            '-m',
-            '"Format markdown files with Prettier"'
-          ])
-          await exec.exec('git', ['push'])
 
-          await githubClient.issues.createComment({
-            issue_number: github.context.issue.number,
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            body: `base=${pr.data.base.sha}
-            head=${pr.data.head.sha}
-            branch=${pr.data.head.ref}
-            filesToFormat=${util.inspect(filesToFormat)}
-            checkoutExitCode=${checkoutExitCode}
-            `
-          })
+          // see if we made any changes
+          const madeChanges = await exec.exec(
+            'git',
+            ['diff', '--cached', '--quiet'],
+            {ignoreReturnCode: true}
+          )
+
+          if (madeChanges === 1) {
+            await exec.exec('git', [
+              'commit',
+              '-m',
+              '"Format markdown files with Prettier"'
+            ])
+            await exec.exec('git', ['push'])
+          } else {
+            await githubClient.issues.createComment({
+              issue_number: github.context.issue.number,
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              body: `Prettier ran, but didn't make any changes to the files you added/modified`
+            })
+          }
         } else {
           // Not a pull request
           core.debug(`Ran, but this was an Issue, and not a Pull Request`)
