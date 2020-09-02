@@ -64,11 +64,11 @@ async function run(): Promise<void> {
             await fs.writeFile(filename, formatted)
           }
 
-          await exec.exec('git', ['config', 'user.name', 'github-actions'])
+          await exec.exec('git', ['config', 'user.name', 'github-actions[bot]'])
           await exec.exec('git', [
             'config',
             'user.email',
-            'github-actions@github.com'
+            'github-actions[bot]@users.noreply.github.com'
           ])
           await exec.exec('git', ['add'].concat(filesToFormat))
 
