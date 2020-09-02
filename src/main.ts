@@ -30,7 +30,8 @@ async function run(): Promise<void> {
           owner: github.context.repo.owner,
           repo: github.context.repo.repo
         })
-        if (issue.data.pull_request) {
+        // make sure the Issue is also a Pull Request, and that it's 'open'
+        if (issue.data.pull_request && issue.data.state === 'open') {
           const pr = (await githubClient.request(
             issue.data.pull_request.url
           )) as OctokitResponse<PullsGetResponseData>
