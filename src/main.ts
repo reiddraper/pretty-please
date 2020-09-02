@@ -5,8 +5,11 @@ import * as exec from '@actions/exec'
 import * as Webhooks from '@octokit/webhooks'
 import {OctokitResponse, PullsGetResponseData} from '@octokit/types'
 
+import * as prettier from 'prettier'
+
 import * as process from 'process'
 import * as util from 'util'
+import {promises as fs} from 'fs'
 
 async function run(): Promise<void> {
   try {
@@ -41,10 +44,15 @@ async function run(): Promise<void> {
               per_page: 100
             }
           )
-          const fileMetadata = []
+          const filesToFormat = []
 
           for (const file of pr_files) {
-            fileMetadata.push({status: file.status, filename: file.filename})
+            if (
+              (file.status === 'added' || file.status === 'modified') &&
+              file.filename.endsWith('.md')
+            ) {
+              filesToFormat.push(file.filename)
+            }
           }
 
           const checkoutExitCode = await exec.exec(
@@ -53,15 +61,22 @@ async function run(): Promise<void> {
             {ignoreReturnCode: true}
           )
 
+          for (const filename of filesToFormat) {
+            const fileContents = (await fs.readFile(filename)).toString()
+            const formatted = prettier.format(fileContents, {
+              parser: 'markdown'
+            })
+            await fs.writeFile(filename, formatted)
+          }
+
           await githubClient.issues.createComment({
             issue_number: github.context.issue.number,
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            body: `
-            base=${pr.data.base.sha}
+            body: `base=${pr.data.base.sha}
             head=${pr.data.head.sha}
             branch=${pr.data.head.ref}
-            files=${util.inspect(fileMetadata)}
+            filesToFormat=${util.inspect(filesToFormat)}
             checkoutExitCode=${checkoutExitCode}
             `
           })
