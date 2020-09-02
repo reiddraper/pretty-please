@@ -1,16 +1,12 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import * as exec from '@actions/exec'
+
 import * as Webhooks from '@octokit/webhooks'
 import {OctokitResponse, PullsGetResponseData} from '@octokit/types'
 
 import * as process from 'process'
 import * as util from 'util'
-
-// ---------------------------------------------------------
-// TODO
-// - Make sure the PR isn't merged
-//
-// ---------------------------------------------------------
 
 async function run(): Promise<void> {
   try {
@@ -51,13 +47,23 @@ async function run(): Promise<void> {
             fileMetadata.push({status: file.status, filename: file.filename})
           }
 
+          const checkoutExitCode = await exec.exec(
+            'git',
+            ['checkout', pr.data.head.ref],
+            {ignoreReturnCode: true}
+          )
+
           await githubClient.issues.createComment({
             issue_number: github.context.issue.number,
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            body: `Running base=${pr.data.base.sha} head=${
-              pr.data.head.sha
-            } files=${util.inspect(fileMetadata)}`
+            body: `
+            base=${pr.data.base.sha}
+            head=${pr.data.head.sha}
+            branch=${pr.data.head.ref}
+            files=${util.inspect(fileMetadata)}
+            checkoutExitCode=${checkoutExitCode}
+            `
           })
         } else {
           // Not a pull request
