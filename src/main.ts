@@ -4,6 +4,13 @@ import * as Webhooks from '@octokit/webhooks'
 import {OctokitResponse, PullsGetResponseData} from '@octokit/types'
 
 import * as process from 'process'
+import * as util from 'util'
+
+// ---------------------------------------------------------
+// TODO
+// - Make sure the PR isn't merged
+//
+// ---------------------------------------------------------
 
 async function run(): Promise<void> {
   try {
@@ -28,11 +35,28 @@ async function run(): Promise<void> {
             issue.data.pull_request.url
           )) as OctokitResponse<PullsGetResponseData>
 
+          const pr_files = await githubClient.paginate(
+            githubClient.pulls.listFiles,
+            {
+              owner: github.context.repo.owner,
+              repo: github.context.repo.repo,
+              pull_number: pr.data.number,
+              per_page: 100
+            }
+          )
+          const fileMetadata = []
+
+          for (const file of pr_files) {
+            fileMetadata.push({status: file.status, filename: file.filename})
+          }
+
           await githubClient.issues.createComment({
             issue_number: github.context.issue.number,
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            body: `Running base=${pr.data.base.sha} head=${pr.data.head.sha}`
+            body: `Running base=${pr.data.base.sha} head=${
+              pr.data.head.sha
+            } files=${util.inspect(fileMetadata)}`
           })
         } else {
           // Not a pull request

@@ -1477,6 +1477,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 const process = __importStar(__webpack_require__(765));
+const util = __importStar(__webpack_require__(669));
+// ---------------------------------------------------------
+// TODO
+// - Make sure the PR isn't merged
+//
+// ---------------------------------------------------------
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -1497,11 +1503,21 @@ function run() {
                     });
                     if (issue.data.pull_request) {
                         const pr = (yield githubClient.request(issue.data.pull_request.url));
+                        const pr_files = yield githubClient.paginate(githubClient.pulls.listFiles, {
+                            owner: github.context.repo.owner,
+                            repo: github.context.repo.repo,
+                            pull_number: pr.data.number,
+                            per_page: 100
+                        });
+                        const fileMetadata = [];
+                        for (const file of pr_files) {
+                            fileMetadata.push({ status: file.status, filename: file.filename });
+                        }
                         yield githubClient.issues.createComment({
                             issue_number: github.context.issue.number,
                             owner: github.context.repo.owner,
                             repo: github.context.repo.repo,
-                            body: `Running base=${pr.data.base.sha} head=${pr.data.head.sha}`
+                            body: `Running base=${pr.data.base.sha} head=${pr.data.head.sha} files=${util.inspect(fileMetadata)}`
                         });
                     }
                     else {
