@@ -6,7 +6,7 @@
 
 * Another
 * List
-* Set *this is bold*
+* Set _this is bold_
 
 1. Ordered
 2. List
