@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as Webhooks from '@octokit/webhooks'
+import {OctokitResponse, PullsGetResponseData} from '@octokit/types'
 
 import * as process from 'process'
 
@@ -23,11 +24,15 @@ async function run(): Promise<void> {
           repo: github.context.repo.repo
         })
         if (issue.data.pull_request) {
+          const pr = (await githubClient.request(
+            issue.data.pull_request.url
+          )) as OctokitResponse<PullsGetResponseData>
+
           await githubClient.issues.createComment({
             issue_number: github.context.issue.number,
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            body: 'I ran!'
+            body: `Running base=${pr.data.base.sha} head=${pr.data.head.sha}`
           })
         } else {
           // Not a pull request

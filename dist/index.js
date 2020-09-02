@@ -1496,11 +1496,12 @@ function run() {
                         repo: github.context.repo.repo
                     });
                     if (issue.data.pull_request) {
+                        const pr = (yield githubClient.request(issue.data.pull_request.url));
                         yield githubClient.issues.createComment({
                             issue_number: github.context.issue.number,
                             owner: github.context.repo.owner,
                             repo: github.context.repo.repo,
-                            body: 'I ran!'
+                            body: `Running base=${pr.data.base.sha} head=${pr.data.head.sha}`
                         });
                     }
                     else {
