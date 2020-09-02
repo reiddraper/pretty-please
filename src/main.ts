@@ -69,6 +69,20 @@ async function run(): Promise<void> {
             await fs.writeFile(filename, formatted)
           }
 
+          await exec.exec('git', ['config', 'user.name', 'prettier-please'])
+          await exec.exec('git', [
+            'config',
+            'user.email',
+            'github-actions@github.com'
+          ])
+          await exec.exec('git', ['add'].concat(filesToFormat))
+          await exec.exec('git', [
+            'commit',
+            '-m',
+            'Format markdown files with Prettier'
+          ])
+          await exec.exec('git', ['push'])
+
           await githubClient.issues.createComment({
             issue_number: github.context.issue.number,
             owner: github.context.repo.owner,
