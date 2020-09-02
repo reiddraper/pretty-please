@@ -1,0 +1,13 @@
+name: 'Prettier, please!'
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  comment-run:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
