@@ -4,7 +4,7 @@ on:
     types: [created, edited]
 
 jobs:
-  comment-run:
+  prettier-please:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
