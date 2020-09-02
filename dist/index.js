@@ -1488,12 +1488,25 @@ function run() {
                 const command = testComment(payload.comment.body);
                 if (command === PrettierPleaseCommand.Prettier && !payload.changes) {
                     const githubClient = github.getOctokit(githubToken);
-                    yield githubClient.issues.createComment({
+                    // make sure the issue is a PR, we can't just use the issue from the payload,
+                    // since this does not distinguish between issues and PRs
+                    const issue = yield githubClient.issues.get({
                         issue_number: github.context.issue.number,
                         owner: github.context.repo.owner,
-                        repo: github.context.repo.repo,
-                        body: 'I ran!'
+                        repo: github.context.repo.repo
                     });
+                    if (issue.data.pull_request) {
+                        yield githubClient.issues.createComment({
+                            issue_number: github.context.issue.number,
+                            owner: github.context.repo.owner,
+                            repo: github.context.repo.repo,
+                            body: 'I ran!'
+                        });
+                    }
+                    else {
+                        // Not a pull request
+                        core.debug(`Ran, but this was an Issue, and not a Pull Request`);
+                    }
                 }
                 else {
                     // A command was not parsed, do nothing
