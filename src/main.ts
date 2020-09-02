@@ -91,7 +91,7 @@ async function run(): Promise<void> {
               issue_number: github.context.issue.number,
               owner: github.context.repo.owner,
               repo: github.context.repo.repo,
-              body: `Prettier ran, but didn't make any changes to the files you added/modified`
+              body: `Prettier ran, but didn't make any changes to the files you added/modified.`
             })
           }
         } else {
