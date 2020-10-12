@@ -83,7 +83,7 @@ async function run(): Promise<void> {
             await exec.exec('git', [
               'commit',
               '-m',
-              '"Format markdown files with Prettier"'
+              'Format markdown files with Prettier'
             ])
             await exec.exec('git', ['push'])
           } else {
