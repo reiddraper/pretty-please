@@ -54,7 +54,7 @@ async function run(): Promise<void> {
             }
           }
 
-          await exec.exec('git', ['fetch', pr.data.head.ref])
+          await exec.exec('git', ['fetch', 'origin', pr.data.head.ref])
           await exec.exec('git', ['checkout', pr.data.head.ref])
 
           for (const filename of filesToFormat) {
