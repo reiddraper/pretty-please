@@ -1,15 +1,13 @@
 name: 'Prettier, please!'
 on:
-  issue_comment:
-    types: [created, edited]
+  pull_request:
+    if: ${{ github.event.action == 'comment' }}
 
 jobs:
   prettier-please:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
