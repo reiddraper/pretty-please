@@ -30,6 +30,14 @@ async function run(): Promise<void> {
         })
         // make sure the Issue is also a Pull Request, and that it's 'open'
         if (issue.data.pull_request && issue.data.state === 'open') {
+          // add a reaction of 👀 to the comment
+          await githubClient.reactions.createForIssueComment({
+            comment_id: payload.comment.id,
+            content: 'eyes',
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo
+          })
+
           const pr = (await githubClient.request(
             issue.data.pull_request.url
           )) as OctokitResponse<PullsGetResponseData>
