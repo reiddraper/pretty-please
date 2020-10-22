@@ -128,7 +128,7 @@ enum PrettierPleaseCommand {
 }
 
 function testComment(comment: string): PrettierPleaseCommand {
-  if (comment.trim().startsWith('prettier, please!')) {
+  if (comment.trim().toLowerCase().startsWith('prettier, please!')) {
     return PrettierPleaseCommand.Prettier
   } else {
     return PrettierPleaseCommand.Nothing
