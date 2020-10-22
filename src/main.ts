@@ -54,6 +54,9 @@ async function run(): Promise<void> {
             }
           }
 
+          await exec.exec('git', ['fetch', pr.data.head.ref])
+          await exec.exec('git', ['checkout', pr.data.head.ref])
+
           for (const filename of filesToFormat) {
             const fileContents = (await fs.readFile(filename)).toString()
             const formatted = prettier.format(fileContents, {
