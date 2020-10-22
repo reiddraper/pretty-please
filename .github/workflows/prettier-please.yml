@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
