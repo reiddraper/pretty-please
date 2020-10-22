@@ -11,6 +11,6 @@
 1. Ordered
 2. List
 
-1. _This is bold_
-3. Out of order
-2. This is number two
+3. _This is bold_
+4. Out of order
+5. This is number two
