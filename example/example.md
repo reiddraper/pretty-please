@@ -13,4 +13,11 @@
 3. _This is bold_
 4. Out of order
 5. This is number two
-6. Add trailing whitespace
+6. Add trailing whitespace  
+
+
+This is a text  .  
+
+1. Bar
+3. Foo
+2. Baz
