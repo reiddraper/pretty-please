@@ -13,6 +13,9 @@ import {promises as fs} from 'fs'
 async function run(): Promise<void> {
   try {
     const githubToken = core.getInput('github-token', {required: true})
+    const gitUserName = core.getInput('git-user.name', {required: true})
+    const gitUserEmail = core.getInput('git-user.email', {required: true})
+
     if (github.context.eventName === 'issue_comment') {
       const payload = github.context
         .payload as Webhooks.EventPayloads.WebhookPayloadIssueComment
@@ -73,12 +76,8 @@ async function run(): Promise<void> {
             await fs.writeFile(filename, formatted)
           }
 
-          await exec.exec('git', ['config', 'user.name', 'github-actions[bot]'])
-          await exec.exec('git', [
-            'config',
-            'user.email',
-            'github-actions[bot]@users.noreply.github.com'
-          ])
+          await exec.exec('git', ['config', 'user.name', gitUserName])
+          await exec.exec('git', ['config', 'user.email', gitUserEmail])
           await exec.exec('git', ['add'].concat(filesToFormat))
 
           // see if we made any changes
