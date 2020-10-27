@@ -5,6 +5,14 @@ inputs:
   github-token:
     description: 'GitHub token'
     required: true
+  git-user.name:
+    description: Name to use for git commits
+    required: false
+    default: 'github-actions[bot]'
+  git-user.email:
+    description: Email to use for git commits
+    required: false
+    default: 'github-actions[bot]@users.noreply.github.com'
 runs:
   using: 'node12'
   main: 'dist/index.js'
